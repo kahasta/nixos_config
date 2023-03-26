@@ -13,6 +13,9 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 10;
+  };
 
   fileSystems."/" =
     {

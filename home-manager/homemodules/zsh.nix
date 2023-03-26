@@ -7,6 +7,8 @@
       ems = "sudo -E emacs -nw";
       edhome = "em ~/.config/home-manager/home.nix";
       edcfg = "ems /etc/nixos/configuration.nix";
+      cat = "bat";
+      du = "duf";
     };
     enableAutosuggestions = true;
     oh-my-zsh = {

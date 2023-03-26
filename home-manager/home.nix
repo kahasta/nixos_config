@@ -1,4 +1,10 @@
 { config, pkgs, ... }:
+
+let
+  username = "kahasta";
+  homeDirectory = "/home/${username}";
+  configHome = "${homeDirectory}/.config";
+in
 {
   imports = [
     ./homemodules/nixvim.nix
@@ -9,8 +15,8 @@
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "kahasta";
-  home.homeDirectory = "/home/kahasta";
+  home.username = username;
+  home.homeDirectory = homeDirectory;
 
   nixpkgs.config.allowUnfree = true;
   home.file.".config/nixpkgs/config.nix".text = ''
@@ -47,30 +53,34 @@
     nix-direnv.enable = true;
   };
 
-  xdg.configFile."starship.toml" = {
-    target = "starship.toml";
-    text = ''
-      "$schema" = 'https://starship.rs/config-schema.json'
+  xdg = {
+    inherit configHome;
+    configFile."starship.toml" = {
+      target = "starship.toml";
+      text = ''
+        "$schema" = 'https://starship.rs/config-schema.json'
 
-      add_newline = false
+        add_newline = false
 
-      [package]
-      disabled = true
+        [package]
+        disabled = true
 
-      [character]
-      success_symbol = '[ ](bold #cba6f7)[ ](bold #f2cdcd)[ ](bold #b4befe)[ ](bold #a6e3a1)'
-      error_symbol = '[ ](bold #cba6f7)[ ](bold #f2cdcd)[ ](bold #b4befe)[ ](bold #f38ba8)'
-      vimcmd_symbol = '[ NORMAL](bold #fab387)'
-      vimcmd_visual_symbol = '[ VISUAL](bold #89dceb)'
+        [character]
+        success_symbol = '[ ](bold #cba6f7)[ ](bold #f2cdcd)[ ](bold #b4befe)[ ](bold #a6e3a1)'
+        error_symbol = '[ ](bold #cba6f7)[ ](bold #f2cdcd)[ ](bold #b4befe)[ ](bold #f38ba8)'
+        vimcmd_symbol = '[ NORMAL](bold #fab387)'
+        vimcmd_visual_symbol = '[ VISUAL](bold #89dceb)'
 
-      [git_branch]
-      symbol = ' '
+        [git_branch]
+        symbol = ' '
 
-      [git_status]
-      modified = ''
-      untracked = ''
-      staged = ''
-    '';
+        [git_status]
+        modified = ''
+        untracked = ''
+        staged = ''
+      '';
+    };
+    enable = true;
   };
 
   programs.emacs = {
@@ -110,6 +120,7 @@
     lsof
     lm_sensors
     xclip
+    duf
 
     #translate
     crow-translate
@@ -148,6 +159,7 @@
     gcc
     gnumake
     ripgrep
+    vscodium-fhs
 
     #Android
     jmtpfs

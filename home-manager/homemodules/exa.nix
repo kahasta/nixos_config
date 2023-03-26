@@ -6,6 +6,7 @@ let
     la = "exa -a";
     lt = "exa --tree";
     lla = "exa -la";
+    tree = "exa -T";
   };
 in
 {

@@ -115,6 +115,7 @@ in
       fade = true;
       inactiveOpacity = 1;
       shadow = true;
+      backend = "glx";
       fadeDelta = 4;
       opacityRules = [
         "100:class_g = 'chromium-browser'"
