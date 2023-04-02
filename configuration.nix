@@ -27,6 +27,9 @@ in
    # initrd.kernelModules = [ "amdgpu" ];
   };
 
+  boot.kernelModules = [ "kvm-amd" "kvm-intel" ];
+  boot.extraModprobeConfig = "options kvm_intel nested=1";
+
 
   # nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix = {
@@ -68,7 +71,6 @@ in
     iosevka
     jetbrains-mono
     noto-fonts
-    noto-fonts-cjk
     noto-fonts-emoji
     font-awesome
     nerdfonts
@@ -95,7 +97,10 @@ in
     variables.AMD_VULKAN_ICD = "RADV";
   };
 
+
   environment.etc.openvpn.source = "${pkgs.update-resolv-conf}/libexec/openvpn";
+
+  environment.pathsToLink = [ "/libexec" ];
 
   services = {
     fstrim = {
@@ -137,7 +142,9 @@ in
       desktopManager.xfce.enable = true;
       windowManager.i3 = {
         enable = true;
+        package = pkgs.i3-gaps;
         # configFile = builtins.getEnv "HOME" + ".config/i3/config";
+
 
       };
     };
@@ -195,7 +202,7 @@ in
     isNormalUser = true;
     description = user;
     shell = pkgs.zsh;
-    extraGroups = [ "networkmanager" "wheel" "polkit" "video" "audio" "storage" ];
+    extraGroups = [ "networkmanager" "wheel" "polkit" "video" "audio" "storage" "qemu-libvirtd" "libvirtd" "disk" ];
     packages = with pkgs; [
       firefox
       #  thunderbird
@@ -216,9 +223,9 @@ in
     git
     openvpn
     i3
-    i3status
     polkit
     polkit_gnome
+    virt-manager
     
 
   ];
@@ -230,6 +237,8 @@ in
   #   enable = true;
   #   enableSSHSupport = true;
   # };
+
+  virtualisation.libvirtd.enable = true;
 
   programs.dconf.enable = true;
 

@@ -7,10 +7,15 @@ let
 in
 {
   imports = [
+    ./homemodules/i3wm.nix
+    # ./homemodules/polybar.nix
     ./homemodules/nixvim.nix
     ./homemodules/kitty.nix
     ./homemodules/zsh.nix
     ./homemodules/exa.nix
+    ./homemodules/dunst.nix
+    ./homemodules/rofi.nix
+    # ./homemodules/i3status-rust.nix
   ];
 
   # Home Manager needs a bit of information about you and the
@@ -44,6 +49,9 @@ in
     };
   };
 
+
+
+
   programs.starship = {
     enable = true;
   };
@@ -52,6 +60,7 @@ in
     enable = true;
     nix-direnv.enable = true;
   };
+
 
   xdg = {
     inherit configHome;
@@ -93,6 +102,7 @@ in
     recursive = true;
   };
 
+
   home.sessionVariables = {
     EDITOR = "nvim";
     BROWSER = "chromium";
@@ -122,6 +132,9 @@ in
     xclip
     duf
 
+    #multimedia
+    cmus
+
     #translate
     crow-translate
     # kitty
@@ -140,14 +153,15 @@ in
     #Browsers
     chromium
     qutebrowser
+    nyxt
     #yandex-browser
 
     # for i3
     dunst
+    i3blocks-gaps
     # picom
     feh
     dmenu
-    rofi
     pcmanfm
     volumeicon
 
@@ -176,13 +190,8 @@ in
 
     usbutils
     mesa
-    firejail
+    #firejail
   ];
 
 
-  services = {
-    dunst = {
-      enable = true;
-    };
-  };
 }
