@@ -5,11 +5,10 @@
 
 {
   imports =
-    [
-      (modulesPath + "/installer/scan/not-detected.nix")
+    [ (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usb_storage" "usbhid" "uas" "sd_mod" ];
+  boot.initrd.availableKernelModules = [ "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
@@ -18,24 +17,22 @@
   };
 
   fileSystems."/" =
-    {
-      device = "/dev/disk/by-uuid/91a5bb7e-b018-4914-bb43-cc5b8e4406f7";
-      fsType = "ext4";
+    { device = "/dev/disk/by-uuid/60b928ab-1cd6-4a67-b9ea-9ddcbcdaa5c8";
+      fsType = "btrfs";
+      options = [ "subvol=@" ];
     };
 
   fileSystems."/boot/efi" =
-    {
-      device = "/dev/disk/by-uuid/C219-88EC";
+    { device = "/dev/disk/by-uuid/EFCA-D0CD";
       fsType = "vfat";
     };
 
   fileSystems."/home" =
-    {
-      device = "/dev/disk/by-uuid/c2343120-235d-40d3-8b83-6dbbae3c0f31";
-      fsType = "ext4";
+    { device = "/dev/disk/by-uuid/f73a42c9-2fa3-48b2-9a32-85f20960c71d";
+      fsType = "btrfs";
     };
 
-  # My Automount
+# My Automount
   fileSystems."/mnt/archiew" = {
     device = "/dev/disk/by-uuid/12D66718762D0903";
     fsType = "ntfs-3g";
@@ -80,6 +77,7 @@
       "windows_names"
     ];
   };
+
 
   swapDevices = [ ];
 

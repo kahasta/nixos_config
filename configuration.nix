@@ -241,6 +241,7 @@ in
   virtualisation.libvirtd.enable = true;
 
   programs.dconf.enable = true;
+  programs.zsh.enable = true;
 
   # List services that you want to enable:
 
