@@ -82,6 +82,8 @@ in
 
 
 
+
+
   xdg = {
     inherit configHome;
     configFile."proton.conf" = {

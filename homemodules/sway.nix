@@ -3,6 +3,7 @@
 {
 
   wayland.windowManager.sway = {
+    wrapperFeatures.gtk = true;
     enable = true;
     config =
 

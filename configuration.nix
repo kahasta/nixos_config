@@ -190,6 +190,14 @@ in
     };
   };
 
+  programs.xwayland.enable = true;
+
+  qt = {
+    enable = true;
+    platformTheme = "gnome";
+    style = "adwaita-dark";
+  };
+
   programs.sway = {
     enable = true;
     wrapperFeatures.gtk = true; # so that gtk works properly
