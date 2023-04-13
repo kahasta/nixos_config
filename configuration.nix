@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   user = "kahasta";
@@ -24,7 +24,7 @@ in
   boot.loader.systemd-boot.configurationLimit = 5;
   boot = {
     kernelPackages = pkgs.linuxPackages_latest;
-   # initrd.kernelModules = [ "amdgpu" ];
+    # initrd.kernelModules = [ "amdgpu" ];
   };
 
   boot.kernelModules = [ "kvm-amd" "kvm-intel" ];
@@ -43,13 +43,32 @@ in
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  networking.nameservers = [ "1.1.1.1" "8.8.8.8" "8.8.4.4" ];
+  networking.resolvconf.enable = pkgs.lib.mkForce false;
+  networking.dhcpcd.extraConfig = "nohook resolv.conf";
+  networking.networkmanager = lib.mkForce {
+    dns = "none";
+    enable = true;
+  };
+  networking.dhcpcd.enable = false;
+  services.dnscrypt-proxy2 = {
+    enable = true;
+    settings = {
+      ipv6_servers = true;
+      require_dnssec = true;
 
-  # Enable networking
-  networking.networkmanager.enable = true;
+      sources.public-resolvers = {
+        urls = [
+          "https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md"
+          "https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md"
+        ];
+        cache_file = "/var/lib/dnscrypt-proxy2/public-resolvers.md";
+        minisign_key = "RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3";
+      };
 
-
-  # Set your time zone.
-  time.timeZone = "Europe/Saratov";
+      server_names = [ "adguard-dns-doh" ];
+    };
+  };
 
   # Select internationalisation properties.
   i18n.defaultLocale = "ru_RU.UTF-8";
@@ -65,6 +84,8 @@ in
     LC_TELEPHONE = "ru_RU.UTF-8";
     LC_TIME = "ru_RU.UTF-8";
   };
+
+  time.timeZone = "Europe/Saratov";
 
   fonts.fonts = with pkgs; [
     source-code-pro
@@ -99,10 +120,20 @@ in
 
 
   environment.etc.openvpn.source = "${pkgs.update-resolv-conf}/libexec/openvpn";
+  environment.etc = {
+    "pipewire/pipewire.conf.d/pipewire.conf".text = ''
+        context.properties = {
+        default.clock.allowed-rates = [ 96000 192000]
+      }
+    '';
+  };
 
   environment.pathsToLink = [ "/libexec" ];
 
   services = {
+    ntp = {
+      enable = true;
+    };
     fstrim = {
       enable = true;
     };
@@ -110,9 +141,14 @@ in
     resolved = {
       enable = true;
       extraConfig = ''
+        LLMNR=no
+        ReadEtcHosts=no
+        DNSSEC=no
         nameserver 1.1.1.1
-        dns=none
+        nameserver 8.8.8.8
+        nameserver 8.8.4.4
       '';
+      #dns=none
     };
 
     picom = {
@@ -137,21 +173,49 @@ in
       enable = true;
       displayManager = {
         lightdm.enable = true;
-        defaultSession = "none+i3";
+        # gdm = {
+        #   enable = true;
+        #   wayland = false;
+        # };
+         # defaultSession = "sway";
       };
       desktopManager.xfce.enable = true;
-      windowManager.i3 = {
-        enable = true;
-        package = pkgs.i3-gaps;
-        # configFile = builtins.getEnv "HOME" + ".config/i3/config";
+      # windowManager.i3 = {
+      #   enable = true;
+      #   package = pkgs.i3-gaps;
+      #   # configFile = builtins.getEnv "HOME" + ".config/i3/config";
 
 
-      };
+      # };
     };
   };
 
+  programs.sway = {
+    enable = true;
+    wrapperFeatures.gtk = true; # so that gtk works properly
+    extraPackages = with pkgs; [
+      swaylock
+      swayidle
+      xwayland
+      wl-clipboard
+      wf-recorder
+      mako # notification daemon
+      grim
+      #kanshi
+      slurp
+      dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
+    ];
+    extraSessionCommands = ''
+      export SDL_VIDEODRIVER=wayland
+      export QT_QPA_PLATFORM=wayland
+      export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+      export _JAVA_AWT_WM_NONREPARENTING=1
+      export MOZ_ENABLE_WAYLAND=1
+    '';
+  };
 
-
+  programs.waybar.enable = true;
+  
 
   # Systemd polkit config
   systemd = {
@@ -209,8 +273,25 @@ in
     ];
   };
 
+  users.extraUsers.useriso = {
+    home = "/home/user1-isolated";
+    group = "users";
+    isNormalUser = true;
+    extraGroups = [ "networkmanager" ];
+    createHome = true;
+    uid = 1001;
+    shell = "/run/current-system/sw/bin/zsh";
+    isSystemUser = false;
+    packages = with pkgs; [
+      # yandex-browser
+    ];
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.permittedInsecurePackages = [
+  #   "yandex-browser-22.9.1.1110-1"
+  # ];
 
 
 
@@ -222,11 +303,12 @@ in
     wget
     git
     openvpn
+    openresolv
     i3
     polkit
     polkit_gnome
     virt-manager
-    
+
 
   ];
 
@@ -242,6 +324,7 @@ in
 
   programs.dconf.enable = true;
   programs.zsh.enable = true;
+  programs.steam.enable = true;
 
   # List services that you want to enable:
 

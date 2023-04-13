@@ -9,6 +9,7 @@
       edcfg = "ems /etc/nixos/configuration.nix";
       cat = "bat";
       du = "duf";
+      useriso = "sudo -i -u useriso";
     };
     # enableAutosuggestions = true;
     oh-my-zsh = {
