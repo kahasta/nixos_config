@@ -7,7 +7,11 @@ let
 in
 {
   imports = [
-    ./homemodules/i3wm.nix
+    # ./homemodules/sway.nix
+    # ./homemodules/waybar.nix
+     ./homemodules/i3wm.nix
+    # ./homemodules/herbstluftwm.nix
+     ./homemodules/i3blocks.nix
     # ./homemodules/polybar.nix
     ./homemodules/nixvim.nix
     ./homemodules/kitty.nix
@@ -17,6 +21,18 @@ in
     ./homemodules/rofi.nix
     # ./homemodules/i3status-rust.nix
   ];
+
+  # nixpkgs.overlays = [
+  #   # (import (builtins.fetchTarball {
+  #     #   url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+  #     #   sha256 = "0ghdh82a5yihqqinbr23smk870pi8imjjqasvaw5br4iwh4qi7pp";
+  #     # }))
+  #     (import (builtins.fetchGit {
+  #       url = https://github.com/nix-community/emacs-overlay.git;
+  #       rev= "c470756d69bc9195d0ddc1fcd70110376fc93473";
+  #       ref = "master";
+  #     }))
+  # ];
 
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
@@ -51,9 +67,18 @@ in
 
 
 
-
   programs.starship = {
     enable = true;
+  };
+
+  programs.fzf = {
+    enable = true;
+    enableZshIntegration = true;
+    defaultOptions = [
+      "--color=dark"
+      "--color=fg:-1,bg:-1,hl:#c678dd,fg+:#ffffff,bg+:#4b5263,hl+:#d858fe"
+      "--color=info:#98c379,prompt:#61afef,pointer:#be5046,marker:#e5c07b,spinner:#61afef,header:#61afef"
+    ];
   };
 
   programs.direnv = {
@@ -62,8 +87,18 @@ in
   };
 
 
+
+
+
   xdg = {
     inherit configHome;
+    configFile."proton.conf" = {
+      target = "proton.conf";
+      text = ''
+        steam = "${pkgs.steam}"
+        data = "/mnt/games/Proton"
+      '';
+    };
     configFile."starship.toml" = {
       target = "starship.toml";
       text = ''
@@ -94,7 +129,10 @@ in
 
   programs.emacs = {
     enable = true;
+    # package = pkgs.emacsGit;
   };
+
+
 
 
   home.file.".emacs.d" = {
@@ -107,8 +145,10 @@ in
     EDITOR = "nvim";
     BROWSER = "chromium";
     TERMINAL = "xterm-kitty";
-    TERM = "xterm-kitty";
+    TERM = "xterm-256color";
   };
+
+
 
   home.packages = with pkgs; [
     neofetch
@@ -117,6 +157,7 @@ in
     gtk3
     #shell
     ranger
+    vifm-full
     tldr
     bash
     zip
@@ -131,9 +172,19 @@ in
     lm_sensors
     xclip
     duf
+    xdotool
+    asciiquarium
+
+    #windows
+    proton-caller
+    protontricks
+    protonup-ng
+    wineWowPackages.stagingFull
 
     #multimedia
     cmus
+    easyeffects
+    youtube-dl
 
     #translate
     crow-translate
@@ -146,7 +197,7 @@ in
     tdesktop
     mupdf
     mpv
-    libreoffice
+    #libreoffice
     ark
     bluedevil
     gwenview
@@ -154,10 +205,12 @@ in
     chromium
     qutebrowser
     nyxt
+    baobab
     #yandex-browser
 
     # for i3
     dunst
+    pamixer
     i3blocks-gaps
     # picom
     feh

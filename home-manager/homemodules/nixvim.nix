@@ -2,7 +2,7 @@
 let
   nixvim = import (builtins.fetchGit {
     url = "https://github.com/pta2002/nixvim";
-    rev = "961da92d2cb4951050b4bf5dd50a610944cfe17c";
+    rev = "3d64fab719567efea806d0e2cb09084f62072fa8";
   });
 in
 {
@@ -32,7 +32,7 @@ in
       lsp.servers.rnix-lsp.enable = true;
       #UI
       neo-tree.enable = true;
-      barbar.enable = true;
+      # barbar.enable = true;
     };
     colorschemes.gruvbox.enable = true;
 

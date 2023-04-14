@@ -89,14 +89,31 @@ in
 
   fonts.fonts = with pkgs; [
     source-code-pro
+    inter
     iosevka
+    roboto
     jetbrains-mono
-    noto-fonts
+    # noto-fonts
     noto-fonts-emoji
     font-awesome
     nerdfonts
-    proggyfonts
+    # proggyfonts
   ];
+
+  fonts = {
+    enableDefaultFonts = true;
+    fontDir.enable = true;
+    fontconfig = {
+      enable = true;
+      antialias = true;
+      defaultFonts = {
+        serif = [ "Noto Sans" ];
+        sansSerif = [ "Inter" ];
+        monospace = [ "Iosevka" ];
+        emoji = [ "Noto Color Emoji" ];
+      };
+    };
+  };
 
   # Video amd driver
   hardware = {
@@ -177,20 +194,34 @@ in
         #   enable = true;
         #   wayland = false;
         # };
-         # defaultSession = "sway";
+        # defaultSession = "sway";
       };
       desktopManager.xfce.enable = true;
-      # windowManager.i3 = {
-      #   enable = true;
-      #   package = pkgs.i3-gaps;
-      #   # configFile = builtins.getEnv "HOME" + ".config/i3/config";
+      #   windowManager.qtile = {
+      #     enable = true;
+      #     backend = "x11";
+      #     configFile = builtins.getEnv "HOME" + ".config/qtile/config.py";
+      # extraPackages = python3Packages: with python3Packages; [
+      #   qtile-extras
+      # ];
+      #   };
+      # windowManager.herbstluftwm.enable = true;
+      windowManager.i3 = {
+        enable = true;
+        package = pkgs.i3-gaps;
+        # configFile = builtins.getEnv "HOME" + ".config/i3/config";
+        extraPackages = with pkgs; [
+          i3lock
+          # (python3Packages.py3status.overrideAttrs (oldAttrs: {
+          #   propagatedBuildInputs = with python3Packages; [ pytz tzlocal ] ++ oldAttrs.propagatedBuildInputs;
+          # }))
+        ];
 
-
-      # };
+      };
     };
   };
 
-  programs.xwayland.enable = true;
+  # programs.xwayland.enable = true;
 
   qt = {
     enable = true;
@@ -198,32 +229,32 @@ in
     style = "adwaita-dark";
   };
 
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true; # so that gtk works properly
-    extraPackages = with pkgs; [
-      swaylock
-      swayidle
-      xwayland
-      wl-clipboard
-      wf-recorder
-      mako # notification daemon
-      grim
-      #kanshi
-      slurp
-      dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
-    ];
-    extraSessionCommands = ''
-      export SDL_VIDEODRIVER=wayland
-      export QT_QPA_PLATFORM=wayland
-      export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
-      export _JAVA_AWT_WM_NONREPARENTING=1
-      export MOZ_ENABLE_WAYLAND=1
-    '';
-  };
+  # programs.sway = {
+  #   enable = true;
+  #   wrapperFeatures.gtk = true; # so that gtk works properly
+  #   extraPackages = with pkgs; [
+  #     swaylock
+  #     swayidle
+  #     xwayland
+  #     wl-clipboard
+  #     wf-recorder
+  #     mako # notification daemon
+  #     grim
+  #     #kanshi
+  #     slurp
+  #     dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
+  #   ];
+  #   extraSessionCommands = ''
+  #     export SDL_VIDEODRIVER=wayland
+  #     export QT_QPA_PLATFORM=wayland
+  #     export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+  #     export _JAVA_AWT_WM_NONREPARENTING=1
+  #     export MOZ_ENABLE_WAYLAND=1
+  #   '';
+  # };
 
-  programs.waybar.enable = true;
-  
+  # programs.waybar.enable = true;
+
 
   # Systemd polkit config
   systemd = {

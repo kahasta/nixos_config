@@ -1,17 +1,17 @@
-{ config, pkgs, lib, ... }:
+{ config, options, pkgs, lib, ... }:
 
 {
 
-  xsession.windowManager.i3 = {
+  wayland.windowManager.sway = {
+    wrapperFeatures.gtk = true;
     enable = true;
-    package = pkgs.i3-gaps;
     config =
 
       {
         modifier = "Mod4";
         keybindings =
           let
-            mod = config.xsession.windowManager.i3.config.modifier;
+            mod = config.wayland.windowManager.sway.config.modifier;
           in
           lib.mkOptionDefault
             {
@@ -62,9 +62,8 @@
             };
 
         startup = [
-          { command = "volumeicon"; always = false; notification = false; }
-          { command = "exec --no-startup-id xrandr --output HDMI-A-0 --right-of DisplayPort-2 --auto"; always = false; notification = false; }
-          { command = "feh --randomize --bg-fill /mnt/archiew/Torrent/Abstract\\ wallpapers\\ 4k\\ UHD\\ \\&\\ 8k\\ UHD/3840x2160/"; always = true; notification = false; }
+          # { command = "exec --no-startup-id xrandr --output HDMI-A-1 --right-of DP-3 --auto"; always = false; }
+          # { command = "feh --randomize --bg-fill /mnt/archiew/Torrent/Abstract\\ wallpapers\\ 4k\\ UHD\\ \\&\\ 8k\\ UHD/3840x2160/"; always = true;  }
         ];
 
         gaps = {
@@ -72,22 +71,26 @@
           outer = 6;
         };
         bars = [{
-          position = "top";
-          fonts = {
-            # names = [ "Iosevka" "Font Awesome 6 Free" ];
-            names = [ "JetBrains Mono" "Font Awesome 6 Free" ];
-            size = 12.0;
-          };
-          # statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rust/config-top.toml";
-          statusCommand =
-            "${pkgs.i3blocks-gaps}/bin/i3blocks -c ~/.config/i3/i3blocks.conf";
+          # position = "top";
+          # fonts = {
+          #   # names = [ "Iosevka" "Font Awesome 6 Free" ];
+          #   names = [ "JetBrains Mono" "Font Awesome 6 Free" ];
+          #   size = 12.0;
+          # };
+          # # statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rust/config-top.toml";
+          # statusCommand =
+          #   "${pkgs.waybar}";
+          command = "waybar";
         }];
       };
     extraConfig = ''
-      floating_modifier Mod4
-      for_window [class="^.*"] border pixel 2
-      workspace "1" output DisplayPort-2 
-      workspace "2" output HDMI-A-0 
+            floating_modifier Mod4
+            for_window [class="^.*"] border pixel 2
+            workspace "1" output DP-3 
+            workspace "2" output HDMI-A-1 
+      exec --no-startup-id systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_SESSION_TYPE XDG_SESSION_DESKTOP XDG_CURRENT_DESKTOP
+              exec --no-startup-id mako &
+              # exec --no-startup-id swayidle -w timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
     '';
   };
 

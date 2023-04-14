@@ -9,7 +9,6 @@
 
       {
         modifier = "Mod4";
-        floating.modifier = "Mod4";
         keybindings =
           let
             mod = config.xsession.windowManager.i3.config.modifier;
@@ -48,16 +47,24 @@
               "${mod}+Shift+9" = "move container to workspace 9; workspace9";
               "${mod}+Shift+0" = "move container to workspace 0; workspace0";
 
+              "${mod}+F12" = "exec systemctl poweroff";
+              "${mod}+F11" = "exec systemctl suspend";
+
               # next/previous workspace
               "Mod1+Tab" = "workspace next";
               "Mod1+Shift+Tab" = "workspace prev";
               "${mod}+Tab" = "workspace back_and_forth";
 
+              "XF86AudioRaiseVolume" = "exec --no-startup-id pamixer -i 5";
+              "XF86AudioLowerVolume" = "exec --no-startup-id pamixer -d 5";
+              "XF86AudioMute" = "exec --no-startup-id pamixer -t";
+
             };
 
         startup = [
           { command = "volumeicon"; always = false; notification = false; }
-          { command = "feh --randomize --bg-fill /mnt/archiew/Torrent/Abstract\ wallpapers\ 4k\ UHD\ \&\ 8k\ UHD/3840x2160/"; always = true; notification = false; }
+          { command = "exec --no-startup-id xrandr --output HDMI-A-0 --right-of DisplayPort-2 --auto"; always = false; notification = false; }
+          { command = "feh --randomize --bg-fill /mnt/archiew/Torrent/Abstract\\ wallpapers\\ 4k\\ UHD\\ \\&\\ 8k\\ UHD/3840x2160/"; always = true; notification = false; }
         ];
 
         gaps = {
@@ -68,17 +75,21 @@
           position = "top";
           fonts = {
             # names = [ "Iosevka" "Font Awesome 6 Free" ];
-            names = ["JetBrains Mono" "Font Awesome 6 Free" ];
+            names = [ "JetBrains Mono" "Font Awesome 6 Free" ];
             size = 12.0;
           };
           # statusCommand = "${pkgs.i3status-rust}/bin/i3status-rs ~/.config/i3status-rust/config-top.toml";
           statusCommand =
             "${pkgs.i3blocks-gaps}/bin/i3blocks -c ~/.config/i3/i3blocks.conf";
+            # "py3status";
         }];
       };
-    # extraConfig = ''
-    #         #include ~/.config/i3/config.ini
-    # '';
+    extraConfig = ''
+      floating_modifier Mod4
+      for_window [class="^.*"] border pixel 2
+      workspace "1" output DisplayPort-2 
+      workspace "2" output HDMI-A-0 
+    '';
   };
 
 }
