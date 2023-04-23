@@ -185,7 +185,7 @@ in
       # Configure keymap in X11
       layout = "us,ru";
       xkbVariant = "";
-      xkbOptions = "grp:ctrl_shift_toggle";
+      xkbOptions = "grp:caps_toggle";
       # Enable the X11 windowing system.
       enable = true;
       displayManager = {
@@ -206,6 +206,9 @@ in
       # ];
       #   };
       # windowManager.herbstluftwm.enable = true;
+      windowManager.spectrwm.enable = true;
+      windowManager.leftwm.enable = true;
+      windowManager.bspwm.enable = true;
       windowManager.i3 = {
         enable = true;
         package = pkgs.i3-gaps;
@@ -305,7 +308,7 @@ in
     isNormalUser = true;
     description = user;
     shell = pkgs.zsh;
-    extraGroups = [ "networkmanager" "wheel" "polkit" "video" "audio" "storage" "qemu-libvirtd" "libvirtd" "disk" ];
+    extraGroups = [ "networkmanager" "wheel" "polkit" "video" "audio" "storage" "qemu-libvirtd" "libvirtd" "libvirt" "kvm" "input" "disk" ];
     packages = with pkgs; [
       firefox
       #  thunderbird

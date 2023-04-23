@@ -8,11 +8,14 @@ in
 {
   imports = [
     # ./homemodules/sway.nix
-    # ./homemodules/waybar.nix
+     # ./homemodules/waybar.nix
+    # ./homemodules/eww.nix
+    ./homemodules/bspwm.nix
      ./homemodules/i3wm.nix
+     ./homemodules/spectrwm.nix
     # ./homemodules/herbstluftwm.nix
      ./homemodules/i3blocks.nix
-    # ./homemodules/polybar.nix
+    ./homemodules/polybar.nix
     ./homemodules/nixvim.nix
     ./homemodules/kitty.nix
     ./homemodules/zsh.nix
@@ -89,7 +92,6 @@ in
 
 
 
-
   xdg = {
     inherit configHome;
     configFile."proton.conf" = {
@@ -156,6 +158,8 @@ in
     ripgrep
     gtk3
     #shell
+    trayer
+    xlockmore
     ranger
     vifm-full
     tldr
@@ -174,6 +178,7 @@ in
     duf
     xdotool
     asciiquarium
+    #wireguard-tools
 
     #windows
     proton-caller
@@ -204,7 +209,10 @@ in
     #Browsers
     chromium
     qutebrowser
-    nyxt
+    librewolf
+
+
+    #other
     baobab
     #yandex-browser
 

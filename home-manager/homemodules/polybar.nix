@@ -34,8 +34,8 @@ in
     enable = true;
 
     package = pkgs.polybar.override {
-      i3GapsSupport = true;
-      i3Support = true;
+      # i3GapsSupport = true;
+      # i3Support = true;
       alsaSupport = true;
     };
 
@@ -73,11 +73,11 @@ in
         monitor = "\${env:MONITOR}";
 
         width = "100%";
-        height = 19;
+        height = 24;
         offset-x = "1%";
 
-        scroll-up = "i3wm-wsnext";
-        scroll-down = "i3wm-wsprev";
+        # scroll-up = "i3wm-wsnext";
+        # scroll-down = "i3wm-wsprev";
 
         background = bg;
         foreground = fg;
@@ -87,9 +87,9 @@ in
         font-0 = "Iosevka Mono:size=12;3";
         font-1 = "Iosevka Mono:style=Bold:size=12;3";
 
-        modules-left = "distro-icon dulS ddrT i3 dulT";
+        modules-left = "workspaces i3";
         modules-center = "title";
-        modules-right = "ddlT cpu ddlT temperature ddlS memory dulT durT audio  date ddlS powermenu";
+        modules-right = "cpu temperature memory audio  date powermenu";
 
         # locale = "en_US.UTF-8";
       };
@@ -380,7 +380,7 @@ in
 
         interval = "0.5";
 
-        thermal-zone = 0; # TODO: Find a better way to fill that
+        thermal-zone = 1; # TODO: Find a better way to fill that
         warn-temperature = 60;
         units = true;
 
