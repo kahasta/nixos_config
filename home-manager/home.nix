@@ -190,6 +190,8 @@ in
     cmus
     easyeffects
     youtube-dl
+    mkchromecast
+    pavucontrol
 
     #translate
     crow-translate

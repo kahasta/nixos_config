@@ -148,6 +148,14 @@ in
   environment.pathsToLink = [ "/libexec" ];
 
   services = {
+    openvpn.servers = {
+      kahasta-vpn = {
+        config = "config /home/kahasta/openvpn/MyAWS/kahasta.ovpn";
+        autoStart = false;
+        updateResolvConf = true;
+      };
+    };
+    avahi.enable = true;
     ntp = {
       enable = true;
     };
@@ -367,6 +375,7 @@ in
   programs.dconf.enable = true;
   programs.zsh.enable = true;
   programs.steam.enable = true;
+  programs.ssh.askPassword = "";
 
   # List services that you want to enable:
 
