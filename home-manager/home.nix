@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 let
   username = "kahasta";
@@ -8,13 +8,13 @@ in
 {
   imports = [
     # ./homemodules/sway.nix
-     # ./homemodules/waybar.nix
+    # ./homemodules/waybar.nix
     # ./homemodules/eww.nix
-    ./homemodules/bspwm.nix
-     ./homemodules/i3wm.nix
-     ./homemodules/spectrwm.nix
+    # ./homemodules/bspwm.nix
+    # ./homemodules/i3wm.nix
+    # ./homemodules/spectrwm.nix
     # ./homemodules/herbstluftwm.nix
-     ./homemodules/i3blocks.nix
+    # ./homemodules/i3blocks.nix
     ./homemodules/polybar.nix
     ./homemodules/nixvim.nix
     ./homemodules/kitty.nix
@@ -25,9 +25,9 @@ in
     # ./homemodules/i3status-rust.nix
   ];
 
+
   # nixpkgs.overlays = [
-  #   # (import (builtins.fetchTarball {
-  #     #   url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+  #   # (import (builtins.fetchTarball {#     #   url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
   #     #   sha256 = "0ghdh82a5yihqqinbr23smk870pi8imjjqasvaw5br4iwh4qi7pp";
   #     # }))
   #     (import (builtins.fetchGit {
@@ -59,7 +59,9 @@ in
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-
+  # programs.home-manager = {
+  #   path = "https://github.com/nix-community/home-manager/archive/master.tar.gz";
+  # };
 
   programs.bat = {
     enable = true;
@@ -72,6 +74,10 @@ in
 
   programs.starship = {
     enable = true;
+    # settings = {
+    #   success_symbol = "[](bold #cba6f7)[](bold #f2cdcd)[](bold #b4befe)[ ](bold #a6e3a1)";
+    #   error_symbol = "[](bold #cba6f7)[](bold #f2cdcd)[](bold #b4befe)[ ](bold #f38ba8)";
+    # };
   };
 
   programs.fzf = {
@@ -94,13 +100,13 @@ in
 
   xdg = {
     inherit configHome;
-    configFile."proton.conf" = {
-      target = "proton.conf";
-      text = ''
-        steam = "${pkgs.steam}"
-        data = "/mnt/games/Proton"
-      '';
-    };
+    # configFile."proton.conf" = {
+    #   target = "proton.conf";
+    #   text = ''
+    #     steam = "${pkgs.steam}/bin/"
+    #     data = "/mnt/games/Proton"
+    #   '';
+    # };
     configFile."starship.toml" = {
       target = "starship.toml";
       text = ''
@@ -151,13 +157,14 @@ in
   };
 
 
-
   home.packages = with pkgs; [
+
     neofetch
     # Emacs
     ripgrep
     gtk3
     #shell
+    tigervnc
     trayer
     xlockmore
     ranger
@@ -178,57 +185,68 @@ in
     duf
     xdotool
     asciiquarium
+    appimage-run
     #wireguard-tools
 
     #windows
-    proton-caller
-    protontricks
-    protonup-ng
-    wineWowPackages.stagingFull
+    # proton-caller
+    # protontricks
+    # protonup-ng
+    # protontricks
+    wine-staging
+    winetricks
+    # wineWowPackages.stagingFull
+    # steam-run-native
+    cabextract
+    gnome.zenity
 
-    #multimedia
+    # EMU
+    yuzu-early-access
+
+    #MULTIMEDIA                                                                      
+    SDL2
+    openal
     cmus
     easyeffects
-    youtube-dl
+    yt-dlp
     mkchromecast
     pavucontrol
 
-    #translate
+    #translate                                                                                                                                                                                
     crow-translate
-    # kitty
+    # kitty                                                                                                                                                                                   
     xsel
 
-    # GUI
+    # GUI                                                                                                                                                                                     
     qbittorrent
     lxappearance
     tdesktop
     mupdf
     mpv
-    #libreoffice
+    #libreoffice                                                                                                                                                                              
     ark
     bluedevil
     gwenview
     #Browsers
+    brave
     chromium
     qutebrowser
-    librewolf
 
 
-    #other
+    #other                                                                                                                                                                                    
     baobab
     #yandex-browser
-
-    # for i3
+    # for i3                                                                                                                                                                                  
     dunst
     pamixer
     i3blocks-gaps
-    # picom
+    # picom                                                                                                                                                                                   
     feh
     dmenu
-    pcmanfm
+    #pcmanfm                                                                                                                                                                                   
     volumeicon
 
-    # Develop
+    # Develop                                                                                                                                                                                 
     coreutils
     nixpkgs-fmt
     nodejs
@@ -238,13 +256,13 @@ in
     ripgrep
     vscodium-fhs
 
-    #Android
+    #Android                                                                                                                                                                                  
     jmtpfs
     gphoto2
     libmtp
     mtpfs
 
-    #langs
+    #langs                                                                                                                                                                                    
     python3
 
     nix-prefetch-git
@@ -253,6 +271,7 @@ in
 
     usbutils
     mesa
+
     #firejail
   ];
 

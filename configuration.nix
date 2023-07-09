@@ -12,22 +12,39 @@ in
     [
       # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      # ./hyperland.nix
       # ./modules/neovim.nix
       # <home-manager/nixos>
     ];
 
+
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
+  # boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/boot/efi";
+  boot.loader.timeout = 10;
+  boot.loader.grub = {
+    efiSupport = true;
+    enable = true;
+    #efiInstallAsRemovable = true; # in case canTouchEfiVariables doesn't work for your system
+    device = "nodev";
+    useOSProber = true;
+  };
   boot.supportedFilesystems = [ "ntfs" ];
-  boot.loader.systemd-boot.configurationLimit = 5;
+  # boot.loader.systemd-boot.configurationLimit = 5;
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
-    # initrd.kernelModules = [ "amdgpu" ];
+    kernelPackages = pkgs.linuxPackages_xanmod_latest;
+    initrd.kernelModules = [ "amdgpu" ];
+    # kernelPatches = [{
+    #   name = "big-navi";
+    #   patch = null;
+    #   extraConfig = ''
+    #     DRM_AMD_DC_DCN3_0 y
+    #   '';
+    # }];
   };
 
-  boot.kernelModules = [ "kvm-amd" "kvm-intel" ];
+  boot.kernelModules = [ "amdgpu kvm-amd" "kvm-intel" ];
   boot.extraModprobeConfig = "options kvm_intel nested=1";
 
 
@@ -35,6 +52,11 @@ in
   nix = {
     package = pkgs.nixFlakes;
     extraOptions = "experimental-features = nix-command flakes";
+  };
+
+  nix.settings = {
+    substituters = [ "https://nix-gaming.cachix.org" ];
+    trusted-public-keys = [ "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4=" ];
   };
 
   networking.hostName = "deeptown"; # Define your hostname.
@@ -89,15 +111,19 @@ in
 
   fonts.fonts = with pkgs; [
     source-code-pro
+    fira-code
+    fira-code-symbols
     inter
     iosevka
+    liberation_ttf
     roboto
     jetbrains-mono
-    # noto-fonts
+    noto-fonts
+    noto-fonts-cjk
     noto-fonts-emoji
     font-awesome
-    nerdfonts
-    # proggyfonts
+    # nerdfonts
+    proggyfonts
   ];
 
   fonts = {
@@ -121,6 +147,9 @@ in
     opengl = {
       enable = true;
       driSupport = true;
+      driSupport32Bit = true;
+      # package = unstablepkgs.mesa.drivers;
+      # package32 = unstablepkgs.pkgsi686Linux.mesa.drivers;
       extraPackages = [
         #rocm-opencl-icd
         pkgs.amdvlk
@@ -148,6 +177,25 @@ in
   environment.pathsToLink = [ "/libexec" ];
 
   services = {
+    cockpit = {
+      enable = true;
+      openFirewall = true;
+    };
+
+    # openssh = {
+    #   enable = true;
+    #   passwordAuthentication = false;
+    #   kbdInteractiveAuthentication = false;
+
+    # };
+
+    spice-vdagentd = {
+      enable = true;
+    };
+
+    spice-webdavd = {
+      enable = true;
+    };
     openvpn.servers = {
       kahasta-vpn = {
         config = "config /home/kahasta/openvpn/MyAWS/kahasta.ovpn";
@@ -205,6 +253,7 @@ in
         # defaultSession = "sway";
       };
       desktopManager.xfce.enable = true;
+      desktopManager.gnome.enable = true;
       #   windowManager.qtile = {
       #     enable = true;
       #     backend = "x11";
@@ -214,25 +263,25 @@ in
       # ];
       #   };
       # windowManager.herbstluftwm.enable = true;
-      windowManager.spectrwm.enable = true;
+      # windowManager.spectrwm.enable = true;
       windowManager.leftwm.enable = true;
-      windowManager.bspwm.enable = true;
-      windowManager.i3 = {
-        enable = true;
-        package = pkgs.i3-gaps;
-        # configFile = builtins.getEnv "HOME" + ".config/i3/config";
-        extraPackages = with pkgs; [
-          i3lock
-          # (python3Packages.py3status.overrideAttrs (oldAttrs: {
-          #   propagatedBuildInputs = with python3Packages; [ pytz tzlocal ] ++ oldAttrs.propagatedBuildInputs;
-          # }))
-        ];
+      # windowManager.bspwm.enable = true;
+      # windowManager.i3 = {
+      #   enable = true;
+      #   package = pkgs.i3-gaps;
+      #   # configFile = builtins.getEnv "HOME" + ".config/i3/config";
+      #   extraPackages = with pkgs; [
+      #     i3lock
+      #     # (python3Packages.py3status.overrideAttrs (oldAttrs: {
+      #     #   propagatedBuildInputs = with python3Packages; [ pytz tzlocal ] ++ oldAttrs.propagatedBuildInputs;
+      #     # }))
+      #   ];
 
-      };
+      # };
     };
   };
 
-  # programs.xwayland.enable = true;
+  programs.xwayland.enable = true;
 
   qt = {
     enable = true;
@@ -264,7 +313,7 @@ in
   #   '';
   # };
 
-  # programs.waybar.enable = true;
+  #programs.waybar.enable = true;
 
 
   # Systemd polkit config
@@ -309,6 +358,8 @@ in
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
+  services.blueman.enable = true;
+  hardware.bluetooth.enable = true;
 
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -318,7 +369,7 @@ in
     shell = pkgs.zsh;
     extraGroups = [ "networkmanager" "wheel" "polkit" "video" "audio" "storage" "qemu-libvirtd" "libvirtd" "libvirt" "kvm" "input" "disk" ];
     packages = with pkgs; [
-      firefox
+      #firefox
       #  thunderbird
     ];
   };
@@ -362,6 +413,7 @@ in
 
   ];
 
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -371,10 +423,15 @@ in
   # };
 
   virtualisation.libvirtd.enable = true;
+  virtualisation.waydroid.enable = true;
+  # virtualisation.anbox.enable = true;
+  virtualisation.podman.enable = true;
+  xdg.portal.wlr.enable = true;
 
   programs.dconf.enable = true;
   programs.zsh.enable = true;
-  programs.steam.enable = true;
+  hardware.steam-hardware.enable = true;
+  # programs.steam.enable = true;
   programs.ssh.askPassword = "";
 
   # List services that you want to enable:
@@ -383,7 +440,7 @@ in
   # services.openssh.enable = true;
 
   # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
+  networking.firewall.allowedTCPPorts = [ 5900 ];
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
