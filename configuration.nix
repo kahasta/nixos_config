@@ -66,31 +66,32 @@ in
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
   networking.nameservers = [ "1.1.1.1" "8.8.8.8" "8.8.4.4" ];
-  networking.resolvconf.enable = pkgs.lib.mkForce false;
+  #networking.resolvconf.enable = pkgs.lib.mkForce false;
   networking.dhcpcd.extraConfig = "nohook resolv.conf";
   networking.networkmanager = lib.mkForce {
     dns = "none";
     enable = true;
   };
   networking.dhcpcd.enable = false;
-  services.dnscrypt-proxy2 = {
-    enable = true;
-    settings = {
-      ipv6_servers = true;
-      require_dnssec = true;
+  
+  # services.dnscrypt-proxy2 = {
+  #   enable = true;
+  #   settings = {
+  #     ipv6_servers = true;
+  #     require_dnssec = true;
 
-      sources.public-resolvers = {
-        urls = [
-          "https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md"
-          "https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md"
-        ];
-        cache_file = "/var/lib/dnscrypt-proxy2/public-resolvers.md";
-        minisign_key = "RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3";
-      };
+  #     sources.public-resolvers = {
+  #       urls = [
+  #         "https://raw.githubusercontent.com/DNSCrypt/dnscrypt-resolvers/master/v3/public-resolvers.md"
+  #         "https://download.dnscrypt.info/resolvers-list/v3/public-resolvers.md"
+  #       ];
+  #       cache_file = "/var/lib/dnscrypt-proxy2/public-resolvers.md";
+  #       minisign_key = "RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3";
+  #     };
 
-      server_names = [ "adguard-dns-doh" ];
-    };
-  };
+  #     server_names = [ "adguard-dns-doh" ];
+  #   };
+  # };
 
   # Select internationalisation properties.
   i18n.defaultLocale = "ru_RU.UTF-8";
@@ -122,8 +123,8 @@ in
     noto-fonts-cjk
     noto-fonts-emoji
     font-awesome
-    # nerdfonts
-    proggyfonts
+    terminus-nerdfont
+    nerdfonts
   ];
 
   fonts = {
@@ -165,16 +166,43 @@ in
   };
 
 
-  environment.etc.openvpn.source = "${pkgs.update-resolv-conf}/libexec/openvpn";
+  # environment.etc.openvpn.source = "${pkgs.update-resolv-conf}/libexec/openvpn";
   environment.etc = {
     "pipewire/pipewire.conf.d/pipewire.conf".text = ''
         context.properties = {
+        default.clock.rate = 96000
         default.clock.allowed-rates = [ 96000 192000]
       }
     '';
+    "wireplumber/main.lua.d/99-alsa-lowlatency.lua".text = ''
+      alsa_monitor.rules = {
+                                     {
+                                           matches = {{{ "node.name", "matches", "alsa_output.*" }}};
+                                           apply_properties = {
+                                                   ["audio.format"] = "S32LE",
+                                                   ["audio.rate"] = "96000", -- for USB soundcards it should be twice your desired rate
+                                                   ["api.alsa.period-size"] = 2, -- defaults to 1024, tweak by trial-and-error
+                                                   -- ["api.alsa.disable-batch"] = true, -- generally, USB soundcards use the batch mode
+                                           },
+                                     },
+                                 }
+    '';
   };
 
+
+
   environment.pathsToLink = [ "/libexec" ];
+
+  # DWM custom build
+  nixpkgs.overlays = [
+    (final: prev: {
+      # dwm = prev.dwm.overrideAttrs (old: { src = /home/kahasta/dwm;});
+      dwm = prev.dwm.overrideAttrs (old: { src = /home/kahasta/dwm-flexipatch; });
+      #pdwm = prev.dwm.overrideAttrs (old: { src = /home/kahasta/pdwm;});
+      # dwmblocks = prev.dwmblocks.overrideAttrs (old: { src = /home/kahasta/dwm/dwmblocks;});
+    })
+  ];
+
 
   services = {
     cockpit = {
@@ -198,7 +226,14 @@ in
     };
     openvpn.servers = {
       kahasta-vpn = {
-        config = "config /home/kahasta/openvpn/MyAWS/kahasta.ovpn";
+        config = ''
+          config /home/kahasta/openvpn/MyAWS/kahasta.ovpn
+          script-security 2
+          up ${pkgs.update-systemd-resolved}/libexec/openvpn/update-systemd-resolved
+          up-restart
+          down ${pkgs.update-systemd-resolved}/libexec/openvpn/update-systemd-resolved
+          down-pre
+          '';
         autoStart = false;
         updateResolvConf = true;
       };
@@ -212,7 +247,7 @@ in
     };
 
     resolved = {
-      enable = true;
+      enable = false;
       extraConfig = ''
         LLMNR=no
         ReadEtcHosts=no
@@ -236,6 +271,8 @@ in
       ];
     };
 
+
+
     xserver = {
       videoDrivers = [ "amdgpu" ];
       # Configure keymap in X11
@@ -244,16 +281,36 @@ in
       xkbOptions = "grp:caps_toggle";
       # Enable the X11 windowing system.
       enable = true;
+      autorun = true; #enable x
+      desktopManager.xfce.enable = true;
+      # desktopManager.gnome.enable = true;
+      # windowManager.leftwm.enable = true;
+      # windowManager.dk.enable = true;
+      # windowManager.dwm.enable = true;
+      windowManager.awesome = {
+        enable = true;
+        luaModules = with pkgs.luaPackages; [
+          luarocks
+          luadbi-mysql
+        ];
+      };
+
+
+
       displayManager = {
-        lightdm.enable = true;
+        startx.enable = true;
+        sddm = {
+          enable = true;
+          theme = "chili";
+        };
+
+        #lightdm.enable = true;
         # gdm = {
         #   enable = true;
         #   wayland = false;
         # };
         # defaultSession = "sway";
       };
-      desktopManager.xfce.enable = true;
-      desktopManager.gnome.enable = true;
       #   windowManager.qtile = {
       #     enable = true;
       #     backend = "x11";
@@ -264,7 +321,6 @@ in
       #   };
       # windowManager.herbstluftwm.enable = true;
       # windowManager.spectrwm.enable = true;
-      windowManager.leftwm.enable = true;
       # windowManager.bspwm.enable = true;
       # windowManager.i3 = {
       #   enable = true;
@@ -281,37 +337,59 @@ in
     };
   };
 
-  programs.xwayland.enable = true;
-
-  qt = {
-    enable = true;
-    platformTheme = "gnome";
-    style = "adwaita-dark";
-  };
+  # programs.xwayland.enable = true;
 
   # programs.sway = {
   #   enable = true;
   #   wrapperFeatures.gtk = true; # so that gtk works properly
-  #   extraPackages = with pkgs; [
-  #     swaylock
-  #     swayidle
-  #     xwayland
-  #     wl-clipboard
-  #     wf-recorder
-  #     mako # notification daemon
-  #     grim
-  #     #kanshi
-  #     slurp
-  #     dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
-  #   ];
+  #   extraPackages = with pkgs;
+  #     let
+  #       dbus-sway-environment = writeShellScriptBin "dbus-sway-environment" ''
+  #         dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+  #         systemctl --user stop pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
+  #         systemctl --user start pipewire pipewire-media-session xdg-desktop-portal xdg-desktop-portal-wlr
+  #       '';
+  #     in
+  #     [
+  #       swaylock
+  #       swayidle
+  #       dbus-sway-environment
+  #       xdg-utils
+  #       xwayland
+  #       wl-clipboard
+  #       wf-recorder
+  #       wlr-randr
+  #       wlroots
+  #       wlr-protocols
+  #       wlrctl
+  #       tofi
+  #       wob
+  #       pcmanfm-qt
+  #       wbg
+  #       mako # notification daemon
+  #       grim
+  #       #kanshi
+  #       slurp
+  #       dmenu # Dmenu is the default in the config but i recommend wofi since its wayland native
+  #     ];
   #   extraSessionCommands = ''
   #     export SDL_VIDEODRIVER=wayland
   #     export QT_QPA_PLATFORM=wayland
   #     export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
   #     export _JAVA_AWT_WM_NONREPARENTING=1
   #     export MOZ_ENABLE_WAYLAND=1
+  #     systemctl --user import-environment XDG_SESSION_TYPE XDG_CURRENT_DESKTOP
+  #     dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+  #     export TERM=xterm
   #   '';
   # };
+
+  qt = {
+    enable = true;
+    platformTheme = "gnome";
+    style = "adwaita-dark";
+  };
+  services.dbus.enable = true;
 
   #programs.waybar.enable = true;
 
@@ -330,6 +408,16 @@ in
         RestartSec = 1;
         TimeoutStopSec = 10;
       };
+    };
+    user.services.shadowsocks-rust = {
+      description = "shadowsocks-rust Daemon";
+      after = [ "network.target" "openvpn-kahasta-vpn.service"];
+      wantedBy = [ "multi-user.target" ];
+      path = [ pkgs.shadowsocks-rust ];
+      serviceConfig.PrivateTmp = true;
+      script = ''
+        exec sslocal -c /home/kahasta/shadowsocks/my.json
+      '';
     };
   };
 
@@ -374,22 +462,10 @@ in
     ];
   };
 
-  users.extraUsers.useriso = {
-    home = "/home/user1-isolated";
-    group = "users";
-    isNormalUser = true;
-    extraGroups = [ "networkmanager" ];
-    createHome = true;
-    uid = 1001;
-    shell = "/run/current-system/sw/bin/zsh";
-    isSystemUser = false;
-    packages = with pkgs; [
-      # yandex-browser
-    ];
-  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowBroken = true;
   # nixpkgs.config.permittedInsecurePackages = [
   #   "yandex-browser-22.9.1.1110-1"
   # ];
@@ -409,10 +485,17 @@ in
     polkit
     polkit_gnome
     virt-manager
+    sddm-chili-theme
+    vulkan-tools
 
 
   ];
 
+  # environment.sessionVariables = {
+  #   GTK_USE_PORTAL = "0";
+  # };
+
+  # environment.sessionVariables.XDG_DATA_DIRS = [ (pkgs.glib.getSchemaDataDirPath pkgs.gsettings-desktop-schemas) ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -426,7 +509,17 @@ in
   virtualisation.waydroid.enable = true;
   # virtualisation.anbox.enable = true;
   virtualisation.podman.enable = true;
-  xdg.portal.wlr.enable = true;
+  # xdg.portal = {
+  #   enable = true;
+  #   wlr = {
+  #     enable = true;
+  #   };
+  # extraPortals = with pkgs; [
+  #   xdg-desktop-portal-wlr
+  #   xdg-desktop-portal-kde
+  #   # xdg-desktop-portal-gtk 
+  # ];
+  # };
 
   programs.dconf.enable = true;
   programs.zsh.enable = true;
@@ -451,7 +544,7 @@ in
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "22.11"; # Did you read the comment?
+  system.stateVersion = "23.05"; # Did you read the comment?
 
   # Auto upgrade
   #system.autoUpgrade = {

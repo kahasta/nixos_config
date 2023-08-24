@@ -164,7 +164,7 @@ in
       "module/audio" = {
         type = "internal/alsa";
 
-        format-volume = "墳 VOL <label-volume>";
+        format-volume = "VOL <label-volume>";
         format-volume-padding = 1;
         format-volume-foreground = secondary;
         format-volume-background = tertiary;
@@ -174,7 +174,7 @@ in
         format-muted-padding = 1;
         format-muted-foreground = secondary;
         format-muted-background = tertiary;
-        format-muted-prefix = "婢 ";
+        format-muted-prefix = "m";
         format-muted-prefix-foreground = urgency;
         format-muted-overline = bg;
 

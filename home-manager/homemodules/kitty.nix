@@ -10,7 +10,7 @@
       bold_italic_font = "auto";
       # Font size (in pts)
       font_size = 13;
-      background_opacity = "1.0";
+      background_opacity = "0.9";
     };
     extraConfig = ''
       background #212733

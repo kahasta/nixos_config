@@ -4,18 +4,32 @@ let
   username = "kahasta";
   homeDirectory = "/home/${username}";
   configHome = "${homeDirectory}/.config";
+  # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  # rust-overlay.url = "github:oxalica/rust-overlay";
+
+  # dwmblocks = pkgs.dwmblocks.overrideAttrs (old: {
+  #   src = /home/kahasta/dwm/dwmblocks;
+  # });
+  # neovim = pkgs.neovim.overrideAttrs (old: {
+  #   src = https://github.com/neovim/neovim.git;
+  # });
 in
 {
   imports = [
+    # ./homemodules/nnn.nix
+    ./homemodules/cursor.nix
     # ./homemodules/sway.nix
-    # ./homemodules/waybar.nix
+    ./homemodules/waybar.nix
+    ./homemodules/hyprland/hyprland.nix
+    # ./homemodules/pidgin.nix
+    # ./homemodules/tint2.nix
     # ./homemodules/eww.nix
     # ./homemodules/bspwm.nix
     # ./homemodules/i3wm.nix
     # ./homemodules/spectrwm.nix
     # ./homemodules/herbstluftwm.nix
     # ./homemodules/i3blocks.nix
-    ./homemodules/polybar.nix
+    # ./homemodules/polybar.nix
     ./homemodules/nixvim.nix
     ./homemodules/kitty.nix
     ./homemodules/zsh.nix
@@ -23,9 +37,10 @@ in
     ./homemodules/dunst.nix
     ./homemodules/rofi.nix
     # ./homemodules/i3status-rust.nix
+
   ];
 
-
+ # nixpkgs.overlays = [ rust-overlay.overlays.default ];
   # nixpkgs.overlays = [
   #   # (import (builtins.fetchTarball {#     #   url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
   #     #   sha256 = "0ghdh82a5yihqqinbr23smk870pi8imjjqasvaw5br4iwh4qi7pp";
@@ -55,7 +70,7 @@ in
   # You can update Home Manager without changing this value. See
   # the Home Manager release notes for a list of state version
   # changes in each release.
-  home.stateVersion = "22.11";
+  home.stateVersion = "23.05";
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -80,6 +95,10 @@ in
     # };
   };
 
+  # services.sxhkd = {
+  #   enable = true;
+  # };
+
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
@@ -100,6 +119,9 @@ in
 
   xdg = {
     inherit configHome;
+    # configFile."nvim/init.lua" = {
+    #   target = "init.lua";
+    # };
     # configFile."proton.conf" = {
     #   target = "proton.conf";
     #   text = ''
@@ -143,6 +165,7 @@ in
 
 
 
+
   home.file.".emacs.d" = {
     source = ./.emacs.d;
     recursive = true;
@@ -151,23 +174,23 @@ in
 
   home.sessionVariables = {
     EDITOR = "nvim";
-    BROWSER = "chromium";
+    BROWSER = "firefox";
     TERMINAL = "xterm-kitty";
-    TERM = "xterm-256color";
+    TERM = "xterm";
   };
-
 
   home.packages = with pkgs; [
 
+    dwmblocks
     neofetch
     # Emacs
     ripgrep
     gtk3
     #shell
+    xkblayout-state
     tigervnc
     trayer
     xlockmore
-    ranger
     vifm-full
     tldr
     bash
@@ -186,13 +209,20 @@ in
     xdotool
     asciiquarium
     appimage-run
+    waybar
     #wireguard-tools
+    qt6.qtwayland
+    libsForQt5.qt5.qtwayland
+    kotatogram-desktop
 
     #windows
     # proton-caller
     # protontricks
     # protonup-ng
     # protontricks
+    dxvk
+    bottles-unwrapped
+    wineWowPackages.stable
     wine-staging
     winetricks
     # wineWowPackages.stagingFull
@@ -201,9 +231,11 @@ in
     gnome.zenity
 
     # EMU
-    yuzu-early-access
+    # yuzu-mainline
+    citra-canary
 
     #MULTIMEDIA                                                                      
+    radeontop
     SDL2
     openal
     cmus
@@ -217,20 +249,22 @@ in
     # kitty                                                                                                                                                                                   
     xsel
 
-    # GUI                                                                                                                                                                                     
+    # GUI
     qbittorrent
     lxappearance
     tdesktop
     mupdf
     mpv
     #libreoffice                                                                                                                                                                              
+    # telegrams
     ark
     bluedevil
     gwenview
     #Browsers
+    vieb
     brave
-    chromium
-    qutebrowser
+    #chromium
+    firefox
 
 
     #other                                                                                                                                                                                    
@@ -245,16 +279,27 @@ in
     dmenu
     #pcmanfm                                                                                                                                                                                   
     volumeicon
+    volctl
 
-    # Develop                                                                                                                                                                                 
+    # Develop
     coreutils
     nixpkgs-fmt
     nodejs
-    cargo
     gcc
     gnumake
     ripgrep
     vscodium-fhs
+    # Golang
+    go
+    go-outline
+    gopls
+    gopkgs
+    go-tools
+    godef
+    delve
+    # Rust langs
+    rustup
+    # rust-bin.stable.latest.default
 
     #Android                                                                                                                                                                                  
     jmtpfs

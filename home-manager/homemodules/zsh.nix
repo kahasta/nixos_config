@@ -2,6 +2,8 @@
 {
   programs.zsh = {
     enable = true;
+    initExtra = ''
+    '';
     shellAliases = {
       em = "emacs -nw";
       ems = "sudo -E emacs -nw";
@@ -10,16 +12,18 @@
       cat = "bat";
       du = "duf";
       useriso = "sudo -i -u useriso";
+      vi = "nvim";
+      vim = "nvim";
     };
     # enableAutosuggestions = true;
     oh-my-zsh = {
       enable = true;
       plugins = [
-                   "command-not-found"
-                   "ag"
-                   "colored-man-pages"
-                   "cp"
-                   "z"
+        "command-not-found"
+        "ag"
+        "colored-man-pages"
+        "cp"
+        "z"
         #            "poetry"
       ];
       theme = "agnoster";
